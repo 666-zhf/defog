@@ -78,20 +78,7 @@ class Defog(object):
                 self.depthMapVal[row].append(value)
         return self.depthMapVal
 
-    def showInitImage(self):
-        depthMap = self.depthMap
-        init = []
-        for row in range(self.rows):
-            init.append([])
-            for col in range(self.cols):
-                init[row].append(list(self.image[row][col]))
-                init[row][col][0] = min(float(init[row][col][0]) / float(depthMap[row][col]), 255)
-                init[row][col][1] = min(float(init[row][col][1]) / float(depthMap[row][col]), 255)
-                init[row][col][2] = min(float(init[row][col][2]) / float(depthMap[row][col]), 255)
-        Image.showImage(init)
-
     def defog(self):
-        Image.showImage(self.image)
         self.priors = self.getPriors()
         self.showPrior(self.priors)
         Image.showImage(self.depthMap)

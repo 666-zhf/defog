@@ -78,3 +78,9 @@ class Image(object):
             imageArray = Image.listArrayToNPArray(imageArray)
         image = ImgLib.fromarray(imageArray, 'RGB')
         image.show()
+
+    @classmethod
+    def saveImage(cls, listArray, location):
+        arr = np.asarray(listArray)
+        img = ImgLib.fromarray(arr, 'RGB')
+        img.save(location)
