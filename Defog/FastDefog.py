@@ -1,6 +1,6 @@
 from Image import Image
 import numpy as np
-from multiprocessing import Pool
+import time
 
 
 def oneDFromTwoD(x, y, cols):
@@ -18,9 +18,8 @@ def flatten(arr):
 def maxPrior(pixel):
     return max(pixel[0], pixel[1], pixel[2])
 
-def allMaxPriors(flatImage, processes=1):
-    p = Pool(processes)
-    return p.map(maxPrior, flatImage)
+def allMaxPriors(flatImage, pool):
+    return pool.map(maxPrior, flatImage)
 
 def getMinPriorForGrid(image, xstart, xend, ystart, yend):
     output = 255
@@ -72,10 +71,9 @@ def defogPixel(inputArgs):
         outputPixel.append(value)
     return outputPixel
 
-def defogImage(flatImage, airLight, maxPriorVals, minPriorVals, processes=1):
+def defogImage(flatImage, airLight, maxPriorVals, minPriorVals, pool):
     inputArgs = [(pixel, minPriorVals[index], maxPriorVals[index], airLight) for index, pixel in enumerate(flatImage)]
-    p = Pool(processes)
-    outputImage = p.map(defogPixel, inputArgs)
+    outputImage = pool.map(defogPixel, inputArgs)
     return outputImage
 
 def saveImage(flatImage, rows, cols):
@@ -89,7 +87,7 @@ def saveImage(flatImage, rows, cols):
     Image.saveImage(image, './defogged_image.png')
 
 
-def fastDefog(imageLocation, omega=2, processes=1):
+def fastDefog(imageLocation, pool, omega=2):
     image = Image(imageLocation)
     image = image.getImageArray(convertToGrayScale=False)
     rows = len(image)
@@ -98,13 +96,15 @@ def fastDefog(imageLocation, omega=2, processes=1):
     depthMapVal = None
     flatImage = flatten(image)
     flatSize = len(flatImage)
-    maxPriors = allMaxPriors(flatImage, processes)
+    startTime = time.time()
+    maxPriors = allMaxPriors(flatImage, pool)
     minPriors = allMinPriors(image, rows, cols, omega)
-    showFlatImage(maxPriors, rows, cols)
-    showFlatImage(minPriors, rows, cols)
+    airLightStart = time.time()
     airLight = airlight(flatImage)
-    defoggedImage = defogImage(flatImage, airLight, maxPriors, minPriors, processes)
-    for pixel in defoggedImage:
-        pixel.append(255)
+    airLightEnd = time.time()
+    defoggedImage = defogImage(flatImage, airLight, maxPriors, minPriors, pool)
+    endTime = time.time()
+    timeTaken = endTime - startTime - (airLightEnd - airLightStart)
+    print("Time Taken is ", timeTaken)
     showFlatImage(defoggedImage, rows, cols)
 

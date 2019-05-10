@@ -1,6 +1,7 @@
 from Defog import fastDefog
 from Defog import Defog
 import time
+from multiprocessing import Pool
 
 def slowDefog(imageLocation):
     start = time.time()
@@ -9,6 +10,6 @@ def slowDefog(imageLocation):
     print "time taken "+str(time.time()-start)
 
 def fastDefogger(imageLocation, processes=1):
+    p = Pool(processes)
     start = time.time()
-    fastDefog(imageLocation, 2, processes)
-    print "time taken "+str(time.time()-start)
+    fastDefog(imageLocation, p, 2)
